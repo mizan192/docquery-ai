@@ -1,16 +1,50 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.routers import health
-from app.database import engine, Base
+from app.routers import health          # ← import health router
+from app.database import init_db        # ← import init_db
 
-app = FastAPI(title="RAG Q&A System", version="1.0.0")
 
+# ----------------------------------------
+# 1. LIFESPAN — startup & shutdown
+# ----------------------------------------
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # STARTUP — runs when server starts
+    await init_db()
+    print("Database connected")
+    print("DocSense AI is ready")
+
+    yield                   # ← app runs here
+
+    # SHUTDOWN — runs when server stops
+    print("Shutting down DocSense AI")
+
+
+# ----------------------------------------
+# 2. CREATE FastAPI APP
+# ----------------------------------------
+app = FastAPI(
+    title="DocSense AI",
+    description="AI Powered Document Search System",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+
+# ----------------------------------------
+# 3. REGISTER ROUTERS
+# ----------------------------------------
 app.include_router(health.router)
 
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
+# ----------------------------------------
+# 4. ROOT endpoint
+# ----------------------------------------
 @app.get("/")
 async def root():
-    return {"message": "RAG Backend is running 🚀"}
+    return {
+        "app": "DocSense AI",
+        "version": "1.0.0",
+        "status": "running.",
+        "docs": "/docs"
+    }
