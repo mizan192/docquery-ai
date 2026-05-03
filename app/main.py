@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.routers import health          # ← import health router
+from app.routers import health, documents          # ← import health router
 from app.database import init_db        # ← import init_db
-
+from app.models import document       # ← import document model (creates table on startup)
 
 # ----------------------------------------
 # 1. LIFESPAN — startup & shutdown
@@ -35,6 +35,7 @@ app = FastAPI(
 # 3. REGISTER ROUTERS
 # ----------------------------------------
 app.include_router(health.router)
+app.include_router(documents.router)   
 
 
 # ----------------------------------------

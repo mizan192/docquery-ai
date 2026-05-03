@@ -7,3 +7,5 @@ pgvector
 python-dotenv
 pydantic-settings
 alembic
+python-multipart
+pypdf2
