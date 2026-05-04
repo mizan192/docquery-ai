@@ -9,3 +9,7 @@ pydantic-settings
 alembic
 python-multipart
 pypdf2
+openai
+langchain
+langchain-openai
+tiktoken

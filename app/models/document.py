@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 # document table model
@@ -18,3 +19,5 @@ class Document(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # relationship to chunks
+    chunks = relationship("Chunk", back_populates="document")
