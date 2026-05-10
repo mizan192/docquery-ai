@@ -9,7 +9,9 @@ pydantic-settings
 alembic
 python-multipart
 pypdf2
-openai
-langchain
-langchain-openai
-tiktoken
+# skiping this for now, as openai and langchain are paid services
+# openai
+# langchain
+# langchain-openai
+# tiktoken
+sentence-transformers
