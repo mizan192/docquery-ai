@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -9,6 +9,9 @@ class Document(Base):
 
     # primary key
     id = Column(Integer, primary_key=True, index=True)
+
+    # link document to user
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     # document info
     filename = Column(String, nullable=False)

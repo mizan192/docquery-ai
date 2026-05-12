@@ -6,11 +6,41 @@ from app.models.chunk import Chunk
 from app.schemas.chunk import DocumentChunkResponse
 from app.services.chunking import chunk_text
 from app.services.embedding import generate_embeddings
+from app.core.exceptions import InvalidFileType, FileTooLarge, EmptyDocument
+from app.core.logging import logger
 import PyPDF2
 import io
 
 
 router = APIRouter(prefix="/api/v1", tags=["Documents"])
+
+# max file size 10MB
+MAX_FILE_SIZE_MB = 12
+MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+
+# allowed file types
+ALLOWED_EXTENSIONS = [".pdf", ".txt"]
+
+async def validate_file(file: UploadFile) -> bytes:
+    # check file extension
+    if not any(file.filename.endswith(ext) for ext in ALLOWED_EXTENSIONS):
+        logger.warning(f"Invalid file type uploaded: {file.filename}")
+        raise InvalidFileType()
+
+    # read file content
+    content = await file.read()
+
+    # check file size
+    if len(content) > MAX_FILE_SIZE_BYTES:
+        logger.warning(f"File too large: {file.filename} ({len(content)} bytes)")
+        raise FileTooLarge(MAX_FILE_SIZE_MB)
+
+    # check file is not empty
+    if len(content) == 0:
+        logger.warning(f"Empty file uploaded: {file.filename}")
+        raise EmptyDocument()
+
+    return content
 
 
 async def extract_text(file: UploadFile) -> str:
@@ -70,6 +100,7 @@ async def upload_document(
         db.add(chunk_obj)
 
     await db.commit()
+    logger.info(f"Upload complete: document_id={document.id}, total_chunks={len(chunks)}")
 
     return DocumentChunkResponse(
         document_id=document.id,

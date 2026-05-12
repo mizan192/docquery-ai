@@ -6,7 +6,8 @@ from app.models.chunk import Chunk
 from app.schemas.search import SearchRequest, SearchResponse
 from app.services.embedding import generate_embedding
 from app.services.llm import generate_answer
-
+from app.core.exceptions import NoChunksFound
+from app.core.logging import logger
 
 router = APIRouter(prefix="/api/v1", tags=["Search"])
 
@@ -29,17 +30,16 @@ async def search_documents(
 
     # raise error if no chunks found
     if not similar_chunks:
-        raise HTTPException(
-            status_code=404,
-            detail="No relevant chunks found"
-        )
+        logger.warning("No chunks found for question")
+        raise NoChunksFound()
 
     # extract chunk texts
     chunk_texts = [chunk.chunk_text for chunk in similar_chunks]
 
     # generate answer using LLM
     answer = generate_answer(request.question, chunk_texts)
-
+    
+    logger.info("Answer generated successfully")
     return SearchResponse(
         question=request.question,
         answer=answer,

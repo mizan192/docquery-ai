@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from app.routers import health, documents, search          # ← import router
 from app.database import init_db        # ← import init_db
 from app.models import document       # ← import document model (creates table on startup)
+from app.core.logging import logger
+
 
 # ----------------------------------------
 # 1. LIFESPAN — startup & shutdown
@@ -10,14 +12,15 @@ from app.models import document       # ← import document model (creates table
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # STARTUP — runs when server starts
+    logger.info("Starting DocSense AI")
     await init_db()
-    print("Database connected")
-    print("DocSense AI is ready")
-
-    yield                   # ← app runs here
+    logger.info("Database connected")
+    
+    # app runs here
+    yield                   
 
     # SHUTDOWN — runs when server stops
-    print("Shutting down DocSense AI")
+    logger.info("Shutting down DocSense AI")
 
 
 # ----------------------------------------

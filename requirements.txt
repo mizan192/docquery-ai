@@ -18,3 +18,5 @@ sentence-transformers
 transformers
 torch
 sentencepiece
+python-jose[cryptography]
+passlib[bcrypt]
