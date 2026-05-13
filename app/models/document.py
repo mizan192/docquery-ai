@@ -24,3 +24,6 @@ class Document(Base):
 
     # relationship to chunks
     chunks = relationship("Chunk", back_populates="document")
+    
+    # link back to user
+    user = relationship("User", back_populates="documents")

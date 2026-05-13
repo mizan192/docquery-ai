@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.routers import health, documents, search          # ← import router
+from app.routers import health, documents, search, auth        # ← import router
 from app.database import init_db        # ← import init_db
 from app.models import document       # ← import document model (creates table on startup)
 from app.core.logging import logger
@@ -38,6 +38,7 @@ app = FastAPI(
 # 3. REGISTER ROUTERS
 # ----------------------------------------
 app.include_router(health.router)
+app.include_router(auth.router)
 app.include_router(documents.router)   
 app.include_router(search.router)
 

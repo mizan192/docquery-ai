@@ -10,6 +10,8 @@ from app.core.exceptions import InvalidFileType, FileTooLarge, EmptyDocument
 from app.core.logging import logger
 import PyPDF2
 import io
+from app.models.user import User
+from app.core.security import get_current_user
 
 
 router = APIRouter(prefix="/api/v1", tags=["Documents"])
@@ -66,7 +68,8 @@ async def extract_text(file: UploadFile) -> str:
 @router.post("/documents/upload", response_model=DocumentChunkResponse)
 async def upload_document(
     file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     # extract text from uploaded file
     text = await extract_text(file)
@@ -75,6 +78,7 @@ async def upload_document(
 
     # save document metadata to DB
     document = Document(
+        user_id=current_user.id,
         filename=file.filename,
         file_type=file_type,
         content=text
