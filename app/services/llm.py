@@ -43,7 +43,7 @@ from typing import List
 tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-base")
 model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-base")
 
-# use GPU if available, otherwise CPU
+# use NVIDIA GPU (10x) if available, otherwise CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 

@@ -19,3 +19,14 @@ class DocumentChunkResponse(BaseModel):
     filename: str
     total_chunks: int
     message: str
+
+
+class DocumentStatusResponse(BaseModel):
+    document_id: int
+    filename: str
+    status: str
+    total_chunks: int
+    error_message: str | None = None
+
+    class Config:
+        from_attributes = True

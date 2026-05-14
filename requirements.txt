@@ -21,3 +21,6 @@ sentencepiece
 python-jose[cryptography]
 passlib[bcrypt]
 bcrypt==3.2.2
+# microservice communication for embedding
+celery
+redis
