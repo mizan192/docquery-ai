@@ -32,7 +32,8 @@ app = FastAPI(
     title="DocSense AI",
     description="AI Powered Document Search System",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    swagger_ui_parameters={"persistAuthorization": True}  # keeps token after restart
 )
 
 

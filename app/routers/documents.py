@@ -17,7 +17,6 @@ from app.models.user import User
 from app.core.security import get_current_user 
 from app.worker.tasks import process_document
 
-
 router = APIRouter(prefix="/api/v1", tags=["Documents"])
 
 # max file size 10MB
@@ -89,6 +88,7 @@ async def upload_document(
         status=ProcessingStatus.PENDING
     )
     db.add(document)
+
     await db.commit()
     await db.refresh(document)
 
@@ -126,11 +126,12 @@ async def upload_document(
         document_id=document.id,
         filename=file.filename,
         status=ProcessingStatus.PENDING,
+        total_chunks=0,
         message="document uploaded successfully, processing in background"
     )
 
 
-@router.post("/documents/{document_id}/status", response_model=DocumentStatusResponse)
+@router.get("/documents/{document_id}/status", response_model=DocumentStatusResponse)
 async def get_document_status(
     document_id: int,
     db: AsyncSession = Depends(get_db),

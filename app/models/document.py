@@ -44,3 +44,6 @@ class Document(Base):
     
     # link back to user
     user = relationship("User", back_populates="documents")
+
+    error_message = Column(Text, nullable=True)
+

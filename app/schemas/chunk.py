@@ -17,8 +17,13 @@ class ChunkResponse(BaseModel):
 class DocumentChunkResponse(BaseModel):
     document_id: int
     filename: str
+    status: str              
     total_chunks: int
     message: str
+
+    # allows pydantic to read data from SQLAlchemy model objects
+    class Config:
+        from_attributes = True
 
 
 class DocumentStatusResponse(BaseModel):
