@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
 
+    # default top k for search
+    DEFAULT_TOP_K: int = 3
+
     # AI Keys (Phase 4)
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""

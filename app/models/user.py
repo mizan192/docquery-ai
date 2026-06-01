@@ -24,4 +24,5 @@ class User(Base):
 
     # one user can have many documents
     documents = relationship("Document", back_populates="user")
-    
+    # one user can have many chat histories
+    chats = relationship("ChatHistory", back_populates="user")

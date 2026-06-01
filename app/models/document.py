@@ -39,11 +39,9 @@ class Document(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # relationship to chunks
-    chunks = relationship("Chunk", back_populates="document")
-    
-    # link back to user
-    user = relationship("User", back_populates="documents")
-
     error_message = Column(Text, nullable=True)
 
+    # relationships 
+    chunks = relationship("Chunk", back_populates="document")    # one document can have many chunks
+    user = relationship("User", back_populates="documents")       # link back to user
+    chats = relationship("ChatHistory", back_populates="document")   # one document can have many chat histories

@@ -30,7 +30,7 @@ def process_document(self, document_id: int):
         # get document from DB
         document = db.get(Document, document_id)
         if not document:
-            logger.error(f"Document not found for document_id={document_id}")
+            logger.warning(f"Document not found for document_id={document_id}")
             return
 
         try: 
@@ -64,8 +64,8 @@ def process_document(self, document_id: int):
             logger.info(f"Background task completed: document_id={document_id}, chunks={len(chunks)}")
             
         except Exception as e:
-            logger.error(f"Background task failed for document_id={document_id}: {e}")
-            logger.error(traceback.format_exc())
+            logger.warning(f"Background task failed for document_id={document_id}: {e}")
+            logger.warning(traceback.format_exc())
 
             # rollback the failed transaction first, then mark as failed
             try:
@@ -77,10 +77,10 @@ def process_document(self, document_id: int):
                     db.commit()
                     logger.info(f"Status set to FAILED: document_id={document_id}")
             except Exception as inner_e:
-                logger.error(f"Could not update status to FAILED: {inner_e}")
+                logger.warning(f"Could not update status to FAILED: {inner_e}")
 
             # retry task if retries remaining
             try:
                 raise self.retry(exc=e, countdown=60)
             except self.MaxRetriesExceededError:
-                logger.error(f"Max retries exceeded for document_id={document_id}. Giving up.")
+                logger.warning(f"Max retries exceeded for document_id={document_id}. Giving up.")
