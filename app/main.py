@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.routers import health, documents, search, auth        # ← import router
-from app.database import init_db        # ← import init_db
-from app.models import document       # ← import document model (creates table on startup)
+from app.routers import health, documents, search, auth, chat
+from app.database import init_db       
+from app.models import document      
 from app.core.logging import logger
 from fastapi.openapi.utils import get_openapi
 
@@ -44,6 +44,7 @@ app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(documents.router)   
 app.include_router(search.router)
+app.include_router(chat.router)
 
 
 # add bearer token support to swagger UI
