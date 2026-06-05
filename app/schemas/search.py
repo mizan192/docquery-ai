@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from app.config import settings
 from app.schemas.chat import SourceCitation
+from typing import List
 
 class SearchRequest(BaseModel):
     # what user sends to API

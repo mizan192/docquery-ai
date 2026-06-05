@@ -41,7 +41,7 @@ async def chat(
         question=request.question,
         document_id=request.document_id,
         answer=answer,
-        source_chunk=json.dumps(chunk_texts),
+        source_chunks=json.dumps(chunk_texts),
         source_documents=json.dumps(
             list(set([s.document_filename for s in sources]))
         )        

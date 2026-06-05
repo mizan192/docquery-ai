@@ -41,5 +41,6 @@ async def search_documents(
     return SearchResponse(
         question=request.question,
         answer=answer,
-        relevant_chunks=chunk_texts
+        relevant_chunks=chunk_texts,
+        sources=sources
     )
