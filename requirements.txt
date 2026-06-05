@@ -24,3 +24,4 @@ bcrypt==3.2.2
 # microservice communication for embedding
 celery
 redis
+pdfplumber
