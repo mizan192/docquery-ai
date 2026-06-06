@@ -18,25 +18,31 @@ def extract_text_from_pdf(content: bytes) -> str:
             logger.info(f"PDF opened: {len(pdf.pages)} pages")
             
             for page_num, page in enumerate(pdf.pages, start=1):
-
-                # extract normal text from page 
-                page_text = page.extract_text() 
-                if page_text: 
-                    full_text += f"\n{page_text}"
-                
                 # extract tables from page 
                 tables = page.extract_tables() 
+                table_texts = []
                 for table in tables:
                     # convert table to readble text format 
                     table_text = convert_table_to_text(table)
                     if table_text: 
-                        full_text += table_text
+                        table_texts.append(table_text)
+            
+            # extract text outside tables only 
+            # filter_text avoids table areas 
+            page_text = page.extract_text(x_tolerance=3, y_tolerance=3)
+            if page_text: 
+                full_text += f"\n{page_text}"
+            
+            # add table text to full_text
+            for table_text in table_texts:
+                full_text += table_text
+
         logger.info(f"Successfully extracted text from {len(pdf.pages)} PDF pages")
     except Exception as e: 
         logger.error(f"Error extracting PDF text: {str(e)}")
         raise
 
-    return full_text
+    return full_text.strip()
 
 
 def convert_table_to_text(table: list) -> str:

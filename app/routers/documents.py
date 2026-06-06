@@ -11,11 +11,13 @@ from app.services.chunking import chunk_text
 from app.services.embedding import generate_embeddings
 from app.core.exceptions import InvalidFileType, FileTooLarge, EmptyDocument, DocumentNotFound
 from app.core.logging import logger
-import PyPDF2
+# import PyPDF2
 import io
 from app.models.user import User
 from app.core.security import get_current_user 
 from app.worker.tasks import process_document
+from app.services.extraction import extract_text_from_pdf, extract_text_from_txt
+from fastapi import HTTPException
 
 router = APIRouter(prefix="/api/v1", tags=["Documents"])
 
@@ -48,24 +50,34 @@ async def validate_file(file: UploadFile) -> bytes:
     return content
 
 
-async def extract_text(file: UploadFile) -> str:
-    content = await file.read()
+async def extract_text(file: UploadFile, content: bytes) -> str:
+    """
+    extracts text from uploaded file 
+    uses pdfplumber for PDF (handles tables)
+    """
+    text = ""
+    try: 
+        if file.filename.endswith(".pdf"):
+            # pdfplumber for PDFs with table support (replacing old PyPDF2)
+            text = extract_text_from_pdf(content)
 
-    if file.filename.endswith(".pdf"):
-        pdf_reader = PyPDF2.PdfReader(io.BytesIO(content))
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-        return text
-
-    elif file.filename.endswith(".txt"):
-        return content.decode("utf-8")
-
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="Only PDF and TXT files are supported"
-        )
+        elif file.filename.endswith(".txt"):
+            text = extract_text_from_txt(content)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Only PDF and TXT files are supported"
+            )
+    except Exception as e: 
+        logger.error(f"Error extracting text: {str(e)}")
+        raise EmptyDocument()
+    
+    # check extracted text is not empty 
+    if not text.strip():
+        logger.warning(f"No text extracted from file: {file.filename}")
+        raise EmptyDocument()
+        
+    return text
 
 
 @router.post("/documents/upload", response_model=DocumentChunkResponse)
@@ -74,8 +86,11 @@ async def upload_document(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # validate file 
+    content = await validate_file(file)
+
     # extract text from uploaded file
-    text = await extract_text(file)
+    text = await extract_text(file, content)
 
     file_type = file.filename.split(".")[-1].lower()
 
