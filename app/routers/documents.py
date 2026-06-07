@@ -90,7 +90,7 @@ async def upload_document(
     content = await validate_file(file)
 
     # extract text from uploaded file
-    text = await extract_text(file, content)
+    # text = await extract_text(file, content)
 
     file_type = file.filename.split(".")[-1].lower()
 
@@ -99,7 +99,8 @@ async def upload_document(
         user_id=current_user.id,
         filename=file.filename,
         file_type=file_type,
-        content=text,
+        # save raw bytes as base64 or save file to disk
+        content="",
         status=ProcessingStatus.PENDING
     )
     db.add(document)
@@ -129,12 +130,15 @@ async def upload_document(
     # await db.commit()
     # logger.info(f"Upload complete: document_id={document.id}, total_chunks={len(chunks)}")
 
+
     # NOTE : 
     # Send the task to Celery workers immediately so it runs in background.  
     # .delay() is shorthand for apply_async; use countdown for actual time delays.
     # user gets response right away without waiting
-    process_document.delay(document.id)
-
+    # send raw content to background task
+    # extraction happens in background!
+    process_document.delay(document.id, content, file_type)
+    
     logger.info(f"Document queued for processing: id={document.id}")
 
     return DocumentChunkResponse(

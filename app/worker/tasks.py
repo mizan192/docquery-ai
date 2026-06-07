@@ -8,6 +8,7 @@ from app.config import settings
 from app.models.document import Document, ProcessingStatus
 from app.models.chunk import Chunk
 import traceback
+from app.services.extraction import extract_text
 
 
 # sync engine for celery (celery does not support async db sessions)
@@ -18,7 +19,7 @@ SyncSession = sessionmaker(sync_engine)
 
 
 @celery_app.task(bind=True, max_retries=3)
-def process_document(self, document_id: int):
+def process_document(self, document_id: int, file_content: bytes, file_type: str):
     """
     background task to chunk and embed document
     runs after document is uploaded to DB
@@ -39,9 +40,31 @@ def process_document(self, document_id: int):
             db.commit()
             logger.info(f"Status set to PROCESSING: document_id={document_id}")
 
+            # extract text in backgourd 
+            if file_content: 
+                document_text = extract_text(file_content, file_type)   
+                document.content = document_text
+                db.commit()
+            else: 
+                document_text = document.content
+            
+            if not document_text or not document_text.strip(): 
+                document.status = ProcessingStatus.FAILED
+                document.error_message = "No text extracted from file"
+                db.commit()
+                logger.warning(f"Failed: document_id={document_id} - No text extracted from file")
+                return 
+
             # chunk the document text 
-            chunks = chunk_text(document.content)
+            chunks = chunk_text(document_text)
             logger.info(f"Chunking complete: document_id={document_id}, total_chunks={len(chunks)}")
+
+            if not chunks:
+                document.status = ProcessingStatus.FAILED
+                document.error_message = "No chunks created from file"
+                db.commit()
+                logger.warning(f"Failed: document_id={document_id} - No chunks created from file")
+                return
 
             # generate embeddings for all chunks 
             embeddings = generate_embeddings(chunks)
@@ -56,6 +79,9 @@ def process_document(self, document_id: int):
                     embedding=embedding
                 )
                 db.add(chunk_obj)
+                # commit every 20 chunks
+                if index % 20 == 0:
+                    db.commit()
             
             # update status to completed 
             document.status = ProcessingStatus.COMPLETED
