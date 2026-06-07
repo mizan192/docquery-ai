@@ -24,7 +24,7 @@ async def chat(
     logger.info(f"Chat query by: {current_user.email}")
 
     # use shared RAG service
-    answer, chunk_texts, sources = await get_rag_answer(
+    answer, chunk_texts, sources, overall_accuracy = await get_rag_answer(
         question=request.question,
         user_id=current_user.id,
         db=db,
@@ -44,7 +44,8 @@ async def chat(
         source_chunks=json.dumps(chunk_texts),
         source_documents=json.dumps(
             list(set([s.document_filename for s in sources]))
-        )        
+        ),
+        overall_accuracy=overall_accuracy
     )
     db.add(chat_history)
     await db.commit()
@@ -57,7 +58,8 @@ async def chat(
         question=chat_history.question,
         answer=chat_history.answer,
         sources=sources,
-        created_at=chat_history.created_at
+        created_at=chat_history.created_at,
+        overall_accuracy=chat_history.overall_accuracy
     )    
     
 

@@ -18,6 +18,9 @@ class SourceCitation(BaseModel):
     document_filename: str
     chunk_index: int
     chunk_text: str
+    # accuracy score
+    accuracy_score: float
+    accuracy_percent: int 
 
 
 class ChatResponse(BaseModel):
@@ -27,6 +30,7 @@ class ChatResponse(BaseModel):
     # list of sources used to generate answer
     sources: List[SourceCitation]
     created_at: datetime
+    overall_accuracy: int
 
     class Config:
         from_attributes = True
@@ -38,6 +42,7 @@ class ChatHistoryResponse(BaseModel):
     answer: str
     source_documents: Optional[str]
     created_at: datetime
+    overall_accuracy: Optional[int] = None
 
     class Config:
         from_attributes = True

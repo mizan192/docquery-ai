@@ -28,7 +28,11 @@ async def get_rag_answer(
     question_embedding = generate_embedding(question)
 
     # build base query 
-    query = select(Chunk, Document).join(Document).where(Document.user_id == user_id)
+    query = select(
+        Chunk,
+        Document,
+        Chunk.embedding.cosine_distance(question_embedding).label("distance")
+    ).join(Document).where(Document.user_id == user_id)
     
     # filter by document id if provided 
     if document_id:
@@ -42,26 +46,42 @@ async def get_rag_answer(
     result = await db.execute(query)
     rows = result.all() 
 
+    if not rows: 
+        return "", [], [], 0
+
     # exact chunks and build source citations 
     chunk_text = [] 
     sources = []
+    distances = []
 
-    for chunk, document in rows: 
+    for chunk, document, distance in rows: 
         chunk_text.append(chunk.chunk_text) 
+        distances.append(distance)
+
+        # calculate accurecy for each chunk 
+        accuracy_score = round(1 - distance, 3) 
+        accuracy_percent = max(0, min(100, int(accuracy_score * 100)))
+
         sources.append(
             SourceCitation( 
                 document_filename=document.filename, 
                 chunk_index=chunk.chunk_index, 
-                chunk_text=chunk.chunk_text
+                chunk_text=chunk.chunk_text,
+                accuracy_score=accuracy_score,
+                accuracy_percent=accuracy_percent
             )
         )
     
+    # overall accuracy based on best mathching chunk 
+    best_distance = distances[0] if distances else 0
+    overall_accuracy = max(0, min(100, int((1 - best_distance) * 100)))
+
     logger.info(
-        f"Found {len(chunk_text)} sources for question: {question}"
+        f"Found {len(chunk_text)} sources for question: {question}, overall accuracy: {overall_accuracy}"
     )
 
     # generate answer using LLM 
     answer = generate_answer(question, chunk_text) 
     logger.info("Answer generated successfully")
 
-    return answer, chunk_text, sources
+    return answer, chunk_text, sources, overall_accuracy

@@ -16,3 +16,4 @@ class SearchResponse(BaseModel):
     answer: str                # LLM generated answer
     relevant_chunks: list[str] # chunks used to generate answer
     sources: List[SourceCitation]  # list of sources used to generate answer
+    overall_accuracy: int    # overall accuracy of the answer

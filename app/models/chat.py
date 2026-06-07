@@ -27,6 +27,9 @@ class ChatHistory(Base):
     # source document filenames
     source_documents = Column(Text, nullable=True)
 
+    # overall accuracy of the answer
+    overall_accuracy = Column(Integer, nullable=True)
+
     # timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

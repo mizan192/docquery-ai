@@ -27,7 +27,7 @@ async def search_documents(
     logger.info(f"Search by: {current_user.email}")
 
     # use RAG service - search only in current user documents
-    answer, chunk_texts, sources = await get_rag_answer(
+    answer, chunk_texts, sources, overall_accuracy = await get_rag_answer(
         question=request.question, 
         user_id=current_user.id, 
         db=db, 
@@ -42,5 +42,6 @@ async def search_documents(
         question=request.question,
         answer=answer,
         relevant_chunks=chunk_texts,
-        sources=sources
+        sources=sources,
+        overall_accuracy=overall_accuracy
     )
