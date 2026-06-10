@@ -85,6 +85,7 @@ def process_document(self, document_id: int, file_content: bytes, file_type: str
             
             # update status to completed 
             document.status = ProcessingStatus.COMPLETED
+            document.total_chunks = len(chunks)
             db.commit()
 
             logger.info(f"Background task completed: document_id={document_id}, chunks={len(chunks)}")

@@ -37,29 +37,26 @@ The T5 model is a powerful text-to-text transformer that can generate answers ba
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 import torch
 from typing import List
+from app.core.logging import logger 
+from app.services.prompts import build_prompt, post_process_answer 
 
 
 # load tokenizer and model directly - faster than pipeline
-tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-base")
-model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-base")
+model_name = "google/flan-t5-base"
+tokenizer = T5Tokenizer.from_pretrained(model_name)
+model = T5ForConditionalGeneration.from_pretrained(model_name)
 
 # use NVIDIA GPU (10x) if available, otherwise CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
 
-def generate_answer(question: str, chunks: List[str]) -> str:
-    # combine all relevant chunks into single context string
-    context = " ".join(chunks)
-
-    # flan-t5 understands detailed instructions
-    prompt = f"""
-    Answer the question based on the context below.
-    If answer is not in context say I don't know.
-    Context: {context}
-    Question: {question}
-    Answer:
+def generate_answer(question: str, chunks: List[str], category: str = "general") -> str:
     """
+    generates answer using category specific prompt
+    uses flan-t5 for text generation
+    """
+    prompt = build_prompt(question, chunks, category)
 
     # tokenize prompt - converts text to numbers for model
     inputs = tokenizer(
@@ -74,10 +71,16 @@ def generate_answer(question: str, chunks: List[str]) -> str:
         inputs.input_ids,
         max_new_tokens=150,       # max length of answer
         num_beams=4,              # better quality answer
-        early_stopping=True       # stop when answer is complete
+        early_stopping=True,       # stop when answer is complete
+        temperature=0.7,         # controls randomness: lower = more deterministic
+        no_repeat_ngram_size=3,   # prevent repeating phrases
+        do_sample=True,            # use sampling (more creative/natural)
+        repetition_penalty=1.2,   # penalize repeating tokens
     )
 
     # decode answer from numbers back to text
     answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
+    
+    # post process based on category
+    answer = post_process_answer(answer, category)
     return answer

@@ -1,10 +1,9 @@
 from app.schemas.chunk import DocumentStatusResponse
-from app.models.document import ProcessingStatus
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from app.models.document import Document, ProcessingStatus, DocumentCategory 
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.database import get_db
-from app.models.document import Document
 from app.models.chunk import Chunk
 from app.schemas.chunk import DocumentChunkResponse
 from app.services.chunking import chunk_text
@@ -83,9 +82,16 @@ async def extract_text(file: UploadFile, content: bytes) -> str:
 @router.post("/documents/upload", response_model=DocumentChunkResponse)
 async def upload_document(
     file: UploadFile = File(...),
+    category: str = Form(default=DocumentCategory.GENERAL),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
+    # validate category 
+    valid_categories = [cat.value for cat in DocumentCategory]
+    if category not in valid_categories:
+        category = DocumentCategory.GENERAL
+
     # validate file 
     content = await validate_file(file)
 
@@ -101,7 +107,8 @@ async def upload_document(
         file_type=file_type,
         # save raw bytes as base64 or save file to disk
         content="",
-        status=ProcessingStatus.PENDING
+        status=ProcessingStatus.PENDING,
+        category=category
     )
     db.add(document)
 
@@ -146,6 +153,7 @@ async def upload_document(
         filename=file.filename,
         status=ProcessingStatus.PENDING,
         total_chunks=0,
+        category=category,
         message="document uploaded successfully, processing in background"
     )
 

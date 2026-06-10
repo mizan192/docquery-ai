@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from app.models.document import DocumentCategory 
 
 
 # response schema for a single chunk
@@ -20,6 +21,7 @@ class DocumentChunkResponse(BaseModel):
     status: str              
     total_chunks: int
     message: str
+    category: str
 
     # allows pydantic to read data from SQLAlchemy model objects
     class Config:
@@ -32,6 +34,9 @@ class DocumentStatusResponse(BaseModel):
     status: str
     total_chunks: int
     error_message: str | None = None
+    category: str 
+    expected_chunks: int = 0 
+    progress_percent: int = 0
 
     class Config:
         from_attributes = True

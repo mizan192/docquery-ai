@@ -54,9 +54,17 @@ async def get_rag_answer(
     sources = []
     distances = []
 
+
+    # get category from first matching document
+    # all chunks from same search should have same category
+    category = "general"
+
     for chunk, document, distance in rows: 
         chunk_text.append(chunk.chunk_text) 
         distances.append(distance)
+
+        # get category from document  
+        category = document.category or "general"
 
         # calculate accurecy for each chunk 
         accuracy_score = round(1 - distance, 3) 
@@ -81,7 +89,7 @@ async def get_rag_answer(
     )
 
     # generate answer using LLM 
-    answer = generate_answer(question, chunk_text) 
+    answer = generate_answer(question, chunk_text, category) 
     logger.info("Answer generated successfully")
 
     return answer, chunk_text, sources, overall_accuracy
