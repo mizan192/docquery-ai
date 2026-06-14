@@ -44,6 +44,11 @@ class Document(Base):
         default=DocumentCategory.GENERAL,
         nullable=False
     )
+    # category = Column(
+    #     Enum(DocumentCategory),
+    #     default=DocumentCategory.GENERAL,
+    #     nullable=False
+    # )
 
     # processing status
     status = Column(

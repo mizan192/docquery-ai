@@ -82,7 +82,7 @@ async def extract_text(file: UploadFile, content: bytes) -> str:
 @router.post("/documents/upload", response_model=DocumentChunkResponse)
 async def upload_document(
     file: UploadFile = File(...),
-    category: str = Form(default=DocumentCategory.GENERAL),
+    category: DocumentCategory = Form(default=DocumentCategory.GENERAL),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -100,17 +100,24 @@ async def upload_document(
 
     file_type = file.filename.split(".")[-1].lower()
 
-    # save document metadata to DB with pending status 
-    document = Document(
-        user_id=current_user.id,
-        filename=file.filename,
-        file_type=file_type,
-        # save raw bytes as base64 or save file to disk
-        content="",
-        status=ProcessingStatus.PENDING,
-        category=category
-    )
-    db.add(document)
+    try:
+        # save document metadata to DB with pending status 
+        document = Document(
+            user_id=current_user.id,
+            filename=file.filename,
+            file_type=file_type,
+            # save raw bytes as base64 or save file to disk
+            content="",
+            status=ProcessingStatus.PENDING,
+            category=category
+        )
+        db.add(document)
+    except Exception as e:
+        logger.error(f"Error saving document metadata: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error saving document metadata {str(e)}"
+        )
 
     await db.commit()
     await db.refresh(document)
@@ -186,5 +193,6 @@ async def get_document_status(
         filename=document.filename,
         status=document.status,
         total_chunks=total_chunks,
+        category=document.category,
         error_message=document.error_message
     )

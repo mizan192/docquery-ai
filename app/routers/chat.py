@@ -35,11 +35,13 @@ async def chat(
     if not chunk_texts:
         raise NoChunksFound()
 
+    document_id = request.document_id if request.document_id else None
+
     # save chat history
     chat_history = ChatHistory(
         user_id=current_user.id,
         question=request.question,
-        document_id=request.document_id,
+        document_id=document_id,
         answer=answer,
         source_chunks=json.dumps(chunk_texts),
         source_documents=json.dumps(

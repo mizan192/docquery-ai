@@ -148,8 +148,39 @@ def post_process_answer(answer: str, category: str) -> str:
     if not answer or not answer.strip():
         return "I could not find relevant information in the document to answer this question."
         
-    if category == "medical" and not answer.endswith(MEDICAL_DISCLAIMER):
+    if category.lower() == "medical" and not answer.endswith(MEDICAL_DISCLAIMER):
         return answer + "\n\n" + MEDICAL_DISCLAIMER
     
     # remove extra newlines for cleaner output
     return answer.strip()
+
+
+def clean_answer(answer: str, prompt: str) -> str:
+    """
+    removes prompt text that leaked into answer
+    flan-t5 sometimes repeats prompt in output
+    """
+    # remove prompt text if it appears in answer
+    if prompt in answer:
+        answer = answer.replace(prompt, "").strip()
+
+    # remove common prompt artifacts
+    artifacts = [
+        "Financial Question:",
+        "Legal Question:",
+        "Medical Question:",
+        "Student Question:",
+        "Question:",
+        "Answer:",
+        "Context:",
+        "Legal Analysis:",
+        "Medical Analysis:",
+        "Financial Analysis:",
+        "Educational Explanation:"
+    ]
+
+    for artifact in artifacts:
+        answer = answer.replace(artifact, "").strip()
+
+    return answer.strip()
+

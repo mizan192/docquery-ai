@@ -38,7 +38,7 @@ from transformers import T5ForConditionalGeneration, T5Tokenizer
 import torch
 from typing import List
 from app.core.logging import logger 
-from app.services.prompts import build_prompt, post_process_answer 
+from app.services.prompts import build_prompt, post_process_answer, clean_answer
 
 
 # load tokenizer and model directly - faster than pipeline
@@ -81,6 +81,9 @@ def generate_answer(question: str, chunks: List[str], category: str = "general")
     # decode answer from numbers back to text
     answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
     
+    # clean prompt artifacts from answer
+    answer = clean_answer(answer, prompt)
+
     # post process based on category
     answer = post_process_answer(answer, category)
     return answer

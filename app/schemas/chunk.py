@@ -34,7 +34,7 @@ class DocumentStatusResponse(BaseModel):
     status: str
     total_chunks: int
     error_message: str | None = None
-    category: str 
+    category: str | None = None
     expected_chunks: int = 0 
     progress_percent: int = 0
 
