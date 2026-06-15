@@ -1,1 +1,96 @@
 
+# This file tells Docker Compose how to run your entire application.
+# It defines all the containers (PostgreSQL, Redis, FastAPI, Celery) and how they connect.
+
+version: "3.8"
+
+services:
+
+  # PostgreSQL database container pre-built image with pgvector extension
+  # replaces your local PostgreSQL
+  db:
+    image: pgvector/pgvector:pg16    # includes pgvector extension
+    environment:
+      POSTGRES_USER: raguser
+      POSTGRES_PASSWORD: ragpass
+      POSTGRES_DB: ragdb
+    ports:
+      - "5433:5432"                  # expose to host machine
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # persist data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raguser -d ragdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis container pre-built image
+  # replaces your local Redis
+  redis:
+    image: redis:7-alpine            # lightweight Redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata:/data              # persist data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI application container custom image from Dockerfile
+  fastapi:
+    build:
+      context: .                     # build from project root
+      dockerfile: docker/Dockerfile  # use our Dockerfile
+    ports:
+      - "8010:8010"                  # expose port to host
+    env_file:
+      - .env                         # load your .env file
+    environment:
+      # override DB and Redis URLs to use container names
+      # "db" and "redis" are container names above
+      DATABASE_URL: postgresql+asyncpg://raguser:ragpass@db:5432/ragdb
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy   # wait for DB to be ready
+      redis:
+        condition: service_healthy   # wait for Redis to be ready
+
+  # Celery worker container custom image from Dockerfile.celery
+  celery:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.celery
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://raguser:ragpass@db:5432/ragdb
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Alembic migration container - builds from Dockerfile
+  # runs once to create/update DB tables then exits
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://raguser:ragpass@db:5432/ragdb
+    depends_on:
+      db:
+        condition: service_healthy
+    command: alembic upgrade head    # run migrations
+    restart: "no"                    # run once and exit
+
+# persistent storage volumes in my system 
+volumes:
+  pgdata:      # PostgreSQL data
+  redisdata:   # Redis data

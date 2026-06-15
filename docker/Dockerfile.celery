@@ -1,0 +1,22 @@
+# This file tells Docker how to build your Celery worker container.
+
+# same base image as FastAPI
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# install system dependencies
+# no postgresql-client needed for celery
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# copy and install requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy project files
+COPY . .
+
+# start celery worker instead of FastAPI
+CMD ["celery", "-A", "app.worker.tasks.celery_app", "worker", "--loglevel=info"]

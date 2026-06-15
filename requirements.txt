@@ -25,3 +25,5 @@ bcrypt==3.2.2
 celery
 redis
 pdfplumber
+# email validation
+email-validator
