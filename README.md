@@ -227,9 +227,9 @@ DEBUG=True
 ```bash
 # create database and user in PostgreSQL
 sudo -u postgres psql
-CREATE USER raguser WITH PASSWORD 'ragpass';
-CREATE DATABASE ragdb OWNER raguser;
-GRANT ALL PRIVILEGES ON DATABASE ragdb TO raguser;
+CREATE USER raguser WITH PASSWORD 'yourpass';
+CREATE DATABASE ragdb OWNER user;
+GRANT ALL PRIVILEGES ON DATABASE yourdb TO user;
 \q
 
 # run migrations
