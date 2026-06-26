@@ -25,6 +25,10 @@ COPY requirements.txt .
 # --no-cache-dir saves space
 RUN pip install --no-cache-dir -r requirements.txt
 
+# pre-download models to speed up container startup and avoid internet dependency
+RUN python -c "from transformers import AutoTokenizer, AutoModel; AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2'); AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')" && \
+    python -c "from transformers import T5ForConditionalGeneration, T5Tokenizer; T5Tokenizer.from_pretrained('google/flan-t5-base'); T5ForConditionalGeneration.from_pretrained('google/flan-t5-base')"
+
 # copy all project files into container
 COPY . .
 

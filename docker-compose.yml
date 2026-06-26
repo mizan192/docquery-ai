@@ -62,7 +62,8 @@ services:
   celery:
     build:
       context: .
-      dockerfile: docker/Dockerfile.celery
+      dockerfile: docker/Dockerfile
+    command: ["celery", "-A", "app.worker.tasks.celery_app", "worker", "--loglevel=info"]
     env_file:
       - .env
     environment:
@@ -79,7 +80,7 @@ services:
   migrate:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.migrate
     env_file:
       - .env
     environment:

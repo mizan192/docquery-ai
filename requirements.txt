@@ -16,6 +16,7 @@ pypdf2
 # tiktoken
 sentence-transformers
 transformers
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch
 sentencepiece
 python-jose[cryptography]

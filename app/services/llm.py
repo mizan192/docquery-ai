@@ -40,15 +40,21 @@ from typing import List
 from app.core.logging import logger 
 from app.services.prompts import build_prompt, post_process_answer, clean_answer
 
-
-# load tokenizer and model directly - faster than pipeline
+# Model intentionally NOT loaded at module level.
+# Lazy loading ensures the model is only loaded into memory when needed.
 model_name = "google/flan-t5-base"
-tokenizer = T5Tokenizer.from_pretrained(model_name)
-model = T5ForConditionalGeneration.from_pretrained(model_name)
 
-# use NVIDIA GPU (10x) if available, otherwise CPU
+_tokenizer: T5Tokenizer | None = None
+_model: T5ForConditionalGeneration | None = None
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.to(device)
+
+def _get_tokenizer_and_model():
+    global _tokenizer, _model
+    if _tokenizer is None or _model is None:
+        _tokenizer = T5Tokenizer.from_pretrained(model_name)
+        _model = T5ForConditionalGeneration.from_pretrained(model_name)
+        _model = _model.to(device)
+    return _tokenizer, _model
 
 
 def generate_answer(question: str, chunks: List[str], category: str = "general") -> str:
@@ -57,6 +63,7 @@ def generate_answer(question: str, chunks: List[str], category: str = "general")
     uses flan-t5 for text generation
     """
     prompt = build_prompt(question, chunks, category)
+    tokenizer, model = _get_tokenizer_and_model()
 
     # tokenize prompt - converts text to numbers for model
     inputs = tokenizer(
