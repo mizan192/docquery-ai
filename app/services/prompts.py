@@ -107,6 +107,7 @@ def build_prompt(
     question: str,
     chunks: list[str],
     category: str = "general",
+    conversation_history: str = ""
 ) -> str: 
     """
     Build a prompt for the language model with the given question and context chunks
@@ -115,6 +116,7 @@ def build_prompt(
         question (str): The user's question
         chunks (list[str]): List of text chunks from the document
         category (str): Category of the document
+        conversation_history (str): Previous conversation context from LangChain
     
     Returns:
         str: The complete prompt for the language model
@@ -125,9 +127,15 @@ def build_prompt(
 
     context = "\n---\n".join(chunks)
     
+    # inject conversation history if it exists
+    if conversation_history:
+        formatted_question = f"Previous Conversation Context:\n{conversation_history}\n\nCurrent Question: {question}"
+    else:
+        formatted_question = question
+        
     prompt = template.format(
         context=context,
-        question=question
+        question=formatted_question
     )
 
     return prompt

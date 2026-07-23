@@ -11,7 +11,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     # default top k for search
-    DEFAULT_TOP_K: int = 3
+    DEFAULT_TOP_K: int = 3  
+
+    #default top k for remembers in conversation
+    DEFAULT_REMEMBER_TOP_K: int = 10
 
     # AI Keys (Phase 4)
     OPENAI_API_KEY: str = ""

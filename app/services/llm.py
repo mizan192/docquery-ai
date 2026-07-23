@@ -57,12 +57,17 @@ def _get_tokenizer_and_model():
     return _tokenizer, _model
 
 
-def generate_answer(question: str, chunks: List[str], category: str = "general") -> str:
+def generate_answer(
+    question: str, 
+    chunks: List[str], 
+    category: str = "general",
+    conversation_history: str = ""
+) -> str:
     """
     generates answer using category specific prompt
     uses flan-t5 for text generation
     """
-    prompt = build_prompt(question, chunks, category)
+    prompt = build_prompt(question, chunks, category, conversation_history)
     tokenizer, model = _get_tokenizer_and_model()
 
     # tokenize prompt - converts text to numbers for model

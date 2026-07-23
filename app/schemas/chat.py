@@ -9,8 +9,10 @@ class ChatRequest(BaseModel):
     question: str
     # optional - search specific document
     document_id: Optional[int] = None
-    # number of similar chunks to find
+    # number of similar chunks to find (RAG)
     top_k: int = settings.DEFAULT_TOP_K
+    # number of previous conversations to remember (LangChain)
+    remember_top_k: int = settings.DEFAULT_REMEMBER_TOP_K
 
 
 class SourceCitation(BaseModel):
@@ -31,6 +33,10 @@ class ChatResponse(BaseModel):
     sources: List[SourceCitation]
     created_at: datetime
     overall_accuracy: int
+    document_id: Optional[int] = None
+    top_k: int = settings.DEFAULT_TOP_K
+    # shows if memory was used for this query
+    memory_used: bool = False
 
     class Config:
         from_attributes = True

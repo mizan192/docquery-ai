@@ -16,7 +16,8 @@ async def get_rag_answer(
     user_id: int,
     db: AsyncSession,
     top_k: int = settings.DEFAULT_TOP_K,
-    document_id: Optional[int] = None
+    document_id: Optional[int] = None,
+    conversation_history: str = ""
 ) -> Tuple[str, List[str], List[SourceCitation]]:
 
     """
@@ -89,7 +90,7 @@ async def get_rag_answer(
     )
 
     # generate answer using LLM 
-    answer = generate_answer(question, chunk_text, category) 
+    answer = generate_answer(question, chunk_text, category, conversation_history) 
     logger.info("Answer generated successfully")
 
     return answer, chunk_text, sources, overall_accuracy
