@@ -89,7 +89,7 @@ async def get_rag_answer(
         f"Found {len(chunk_text)} sources for question: {question}, overall accuracy: {overall_accuracy}"
     )
 
-    # generate answer using LLM 
+    # generate answer using LLM with chat history
     answer = generate_answer(question, chunk_text, category, conversation_history) 
     logger.info("Answer generated successfully")
 

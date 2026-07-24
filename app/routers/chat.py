@@ -53,7 +53,7 @@ async def chat(
 
     document_id = request.document_id if request.document_id else None
 
-    # save chat history
+    # save chat history (becomes memory for next question)
     chat_history = ChatHistory(
         user_id=current_user.id,
         question=request.question,
