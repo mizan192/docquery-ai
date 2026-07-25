@@ -12,6 +12,7 @@ from app.core.exceptions import NoChunksFound
 from app.core.logging import logger
 from app.core.security import get_current_user
 from app.services.conversation import ConversationService 
+from app.config import settings
 
 
 router = APIRouter(prefix="/api/v1", tags=["Chat"])
@@ -30,7 +31,7 @@ async def chat(
     conversation_history = await conversation_service.get_conversation_history(
         user_id=current_user.id,
         document_id=request.document_id,
-        k=request.remember_top_k
+        k=settings.DEFAULT_REMEMBER_TOP_K
     )
 
     # track if memeory was used 

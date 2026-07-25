@@ -11,8 +11,6 @@ class ChatRequest(BaseModel):
     document_id: Optional[int] = None
     # number of similar chunks to find (RAG)
     top_k: int = settings.DEFAULT_TOP_K
-    # number of previous conversations to remember (LangChain)
-    remember_top_k: int = settings.DEFAULT_REMEMBER_TOP_K
 
 
 class SourceCitation(BaseModel):
