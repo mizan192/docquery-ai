@@ -96,6 +96,11 @@ def generate_answer(
     # clean prompt artifacts from answer
     answer = clean_answer(answer, prompt)
 
+    # Validate answer quality: if it's too short or just garbage, retry without memory
+    if conversation_history and (len(answer) < 10 or answer.lower() in ["context", "answer", "question", ""]):
+        logger.warning(f"Poor answer generated: '{answer}' -> retrying without memory")
+        return generate_answer(question, chunks, category, conversation_history="")
+
     # post process based on category
     answer = post_process_answer(answer, category)
     return answer

@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     DEFAULT_TOP_K: int = 3  
 
     #default top k for remembers in conversation
-    DEFAULT_REMEMBER_TOP_K: int = 5
+    DEFAULT_REMEMBER_TOP_K: int = 3
 
     # AI Keys (Phase 4)
     OPENAI_API_KEY: str = ""
