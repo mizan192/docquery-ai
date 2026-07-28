@@ -28,5 +28,10 @@ redis
 pdfplumber
 # email validation
 email-validator
+# lang chain for LLM operations
 langchain
 langchain-community
+# testing
+pytest
+pytest-asyncio
+httpx

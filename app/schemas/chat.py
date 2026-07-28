@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import List, Optional
 from app.config import settings
@@ -36,8 +36,7 @@ class ChatResponse(BaseModel):
     # shows if memory was used for this query
     memory_used: bool = False
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ChatHistoryResponse(BaseModel):
@@ -48,5 +47,4 @@ class ChatHistoryResponse(BaseModel):
     created_at: datetime
     overall_accuracy: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
