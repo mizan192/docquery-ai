@@ -1,0 +1,37 @@
+fastapi
+uvicorn[standard]
+sqlalchemy[asyncio]
+asyncpg
+psycopg2-binary
+pgvector
+python-dotenv
+pydantic-settings
+alembic
+python-multipart
+pypdf2
+# skiping this for now, as openai and langchain are paid services
+# openai
+# langchain
+# langchain-openai
+# tiktoken
+sentence-transformers
+transformers
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+sentencepiece
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==3.2.2
+# microservice communication for embedding
+celery
+redis
+pdfplumber
+# email validation
+email-validator
+# lang chain for LLM operations
+langchain
+langchain-community
+# testing
+pytest
+pytest-asyncio
+httpx

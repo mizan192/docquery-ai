@@ -1,0 +1,50 @@
+from pydantic import BaseModel, ConfigDict
+from datetime import datetime
+from typing import List, Optional
+from app.config import settings
+
+
+class ChatRequest(BaseModel):
+    # user question
+    question: str
+    # optional - search specific document
+    document_id: Optional[int] = None
+    # number of similar chunks to find (RAG)
+    top_k: int = settings.DEFAULT_TOP_K
+
+
+class SourceCitation(BaseModel):
+    # source information for each chunk used
+    document_filename: str
+    chunk_index: int
+    chunk_text: str
+    # accuracy score
+    accuracy_score: float
+    accuracy_percent: int 
+
+
+class ChatResponse(BaseModel):
+    id: int
+    question: str
+    answer: str
+    # list of sources used to generate answer
+    sources: List[SourceCitation]
+    created_at: datetime
+    overall_accuracy: int
+    document_id: Optional[int] = None
+    top_k: int = settings.DEFAULT_TOP_K
+    # shows if memory was used for this query
+    memory_used: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ChatHistoryResponse(BaseModel):
+    id: int
+    question: str
+    answer: str
+    source_documents: Optional[str]
+    created_at: datetime
+    overall_accuracy: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)

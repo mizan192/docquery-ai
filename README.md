@@ -235,29 +235,6 @@ curl -X POST http://localhost:8010/api/v1/chat \
 
 ---
 
-## Unit Tests
-
-The project includes 36 unit tests covering core services and API endpoints.
-
-```bash
-# run all tests
-pytest -v
-
-# run specific test file
-pytest tests/test_chunking.py -v
-pytest tests/test_extraction.py -v
-pytest tests/test_api.py -v
-```
-
-Test coverage:
-```
-tests/test_chunking.py    7 tests  -> chunk size, overlap, empty text, edge cases
-tests/test_extraction.py  21 tests -> txt extraction, table conversion, file types
-tests/test_api.py         8 tests  -> auth endpoints, protected routes
-```
-
----
-
 ## Local Development Setup
 
 ### Requirements
